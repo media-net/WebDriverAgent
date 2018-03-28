@@ -23,10 +23,10 @@
 #import "FBLogger.h"
 
 #import "XCUIDevice+FBHelpers.h"
-
+#import "MNConstants.h"
 static NSString *const FBServerURLBeginMarker = @"ServerURLHere->";
 static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
-
+static NSString *const serverBaseURL = @"http://172.16.61.27:8000/server_url?";
 @interface FBHTTPConnection : RoutingConnection
 @end
 
@@ -106,7 +106,33 @@ static NSString *const FBServerURLEndMarker = @"<-ServerURLHere";
     [FBLogger logFmt:@"Last attempt to start web server failed with error %@", [error description]];
     abort();
   }
+  
   [FBLogger logFmt:@"%@http://%@:%d%@", FBServerURLBeginMarker, [XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port], FBServerURLEndMarker];
+  
+  
+  NSString *url = [NSString stringWithFormat:@"http://%@:%d",[XCUIDevice sharedDevice].fb_wifiIPAddress ?: @"localhost", [self.server port]];
+  NSLog(@"HELLO ++++++ %@ +++++++",url);
+  
+  NSString * serverurl =[NSString stringWithFormat:@"%@udid=%@&url=%@",serverBaseURL,UDID,url];
+  
+  
+  
+  NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
+  [request setHTTPMethod:@"GET"];
+  [request setURL:[NSURL URLWithString:serverurl]];
+  
+  [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:
+    ^(NSData *  data,
+      NSURLResponse * _Nullable response,
+      NSError * _Nullable servererror) {
+      
+      NSString *myString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+      NSLog(@"Data received: %@", myString);
+    }] resume];
+  
+  
+  
+  
 }
 
 - (void)stopServing

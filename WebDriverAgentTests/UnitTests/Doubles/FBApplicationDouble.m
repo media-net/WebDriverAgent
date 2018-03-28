@@ -36,7 +36,7 @@
 
 - (NSString *)bundleID
 {
-  return @"com.facebook.awesome";
+  return @"net.media.facebook.awesome";
 }
 
 - (void)resolve
